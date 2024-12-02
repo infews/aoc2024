@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "aoc2024/day1"
+require_relative "aoc2024/day2"
 
 module Aoc2024
   class Error < StandardError; end
