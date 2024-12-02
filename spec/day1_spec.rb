@@ -17,4 +17,20 @@ module Aoc2024::Day1
       end
     end
   end
+
+  RSpec.describe Puzzle2 do
+    context "with test data" do
+      it "solves correctly" do
+        puzzle = Puzzle2.from("spec/data/input_0101_test.txt")
+        expect(puzzle.solution).to eq(31)
+      end
+    end
+
+    context "with real data" do
+      it "solves correctly" do
+        puzzle = Puzzle2.from("spec/data/input_0101.txt")
+        expect(puzzle.solution).to eq(21142653)
+      end
+    end
+  end
 end
