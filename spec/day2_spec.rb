@@ -3,33 +3,35 @@
 require "rspec"
 module Aoc2024::Day2
   RSpec.describe Puzzle do
-    context "with test data" do
-      it "solves correctly" do
-        puzzle = Puzzle.from("spec/data/day02_test.txt")
-        expect(puzzle.solution).to eq(2)
+    context "part one" do
+      context "with test data" do
+        it "solves correctly" do
+          puzzle = Puzzle.from("spec/data/day02_test.txt")
+          expect(puzzle.solution).to eq(2)
+        end
+      end
+
+      context "with real data" do
+        it "solves correctly" do
+          puzzle = Puzzle.from("spec/data/day02.txt")
+          expect(puzzle.solution).to eq(490)
+        end
       end
     end
 
-    context "with real data" do
-      it "solves correctly" do
-        puzzle = Puzzle.from("spec/data/day02.txt")
-        expect(puzzle.solution).to eq(490)
+    context "part two" do
+      context "with test data" do
+        it "solves correctly" do
+          puzzle = Puzzle.from("spec/data/day02_test.txt")
+          expect(puzzle.solution_with_dampers).to eq(4)
+        end
       end
-    end
-  end
 
-  RSpec.describe Puzzle do
-    context "with test data" do
-      it "solves correctly" do
-        puzzle = Puzzle.from("spec/data/day02_test.txt")
-        expect(puzzle.solution_with_dampers).to eq(4)
-      end
-    end
-
-    context "with real data" do
-      it "solves correctly" do
-        puzzle = Puzzle.from("spec/data/day02.txt")
-        expect(puzzle.solution_with_dampers).to eq(536)
+      context "with real data" do
+        it "solves correctly" do
+          puzzle = Puzzle.from("spec/data/day02.txt")
+          expect(puzzle.solution_with_dampers).to eq(536)
+        end
       end
     end
   end
