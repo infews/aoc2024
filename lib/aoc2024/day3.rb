@@ -21,14 +21,13 @@ module Aoc2024
       def solution
         @segments.map { |segment| segment.scan(/mul(\(\d+,\d+\))?/) }
           .flatten
-          .map { |mult| pair_from(mult) }
-          .map { |pair| pair.first * pair.last }
+          .map { |mult| multiply_pair_from(mult) }
           .sum
       end
 
-      def pair_from(mult)
+      def multiply_pair_from(mult)
         /(?<a>\d+),(?<b>\d+)/ =~ mult
-        [a.to_i, b.to_i]
+        a.to_i * b.to_i
       end
     end
   end
