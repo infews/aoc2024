@@ -36,4 +36,3 @@ module Aoc2024::Day3
     end
   end
 end
-
