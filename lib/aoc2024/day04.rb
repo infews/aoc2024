@@ -2,7 +2,7 @@
 
 module Aoc2024
   module Day04
-    class Puzzle
+    class PuzzlePartOne
       def self.from(filename)
         new(input: File.read(filename)
                        .split("\n"))
@@ -22,16 +22,16 @@ module Aoc2024
       end
 
       def find_xs
-        @xs = []
+        @as = []
         @input.each_with_index do |line, row|
           line.each_with_index do |char, col|
-            @xs << [row, col] if char == "X"
+            @as << [row, col] if char == "X"
           end
         end
       end
 
       def count_xmas
-        @xs.each do |coords|
+        @as.each do |coords|
           row = coords.first
           col = coords.last
 
@@ -70,6 +70,7 @@ module Aoc2024
       end
 
       private
+
       def north_east_of(row, col)
         @input[row][col] + @input[row - 1][col + 1] + @input[row - 2][col + 2] + @input[row - 3][col + 3]
       end
@@ -104,6 +105,56 @@ module Aoc2024
 
       def xmas?(chars)
         chars == "XMAS"
+      end
+    end
+
+    class PuzzlePartTwo
+      def self.from(filename)
+        new(input: File.read(filename)
+                       .split("\n"))
+      end
+
+      def initialize(input:)
+        @count = 0
+        @input = input.map { |line| line.split("") }
+        @size = @input.size
+
+        find_as
+        count_xmas
+      end
+
+      def solution
+        @count
+      end
+
+      def find_as
+        @as = []
+        @input.each_with_index do |line, row|
+          line.each_with_index do |char, col|
+            @as << [row, col] if char == "A"
+          end
+        end
+      end
+
+      def count_xmas
+        @as.each do |coords|
+          row = coords.first
+          col = coords.last
+
+          next if row - 1 < 0 || row + 1 >= @size ||
+            col - 1 < 0 || col + 1 >= @size
+
+          corners = @input[row - 1][col - 1] +
+            @input[row + 1][col - 1] +
+            @input[row - 1][col + 1] +
+            @input[row + 1][col + 1]
+
+          @count += 1 if xmas?(corners)
+        end
+      end
+
+      def xmas?(word)
+        word.match /MMSS|SSMM|MSMS|SMSM/
       end
     end
   end
