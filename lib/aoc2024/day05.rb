@@ -2,9 +2,15 @@
 
 module Aoc2024
   module Day05
-    # The first rule, 47|53, means that if an update includes both page number 47 and page number 53,
-    # then page number 47 must be printed at some point before page number 53.
     class Ruleset
+      attr_reader :rules
+
+      def self.from(filename)
+        new(rules: File.read(filename)
+                       .split("\n")
+                       .map { |pair| pair.split("|").map(&:to_i) })
+      end
+
       def initialize(rules:)
         @rules = Array(rules)
       end
@@ -25,6 +31,12 @@ module Aoc2024
 
     class Update
       attr_reader :pages
+      def self.factory_from(filename)
+        File.read(filename)
+          .split("\n")
+          .map { |pages| pages.split(",").map(&:to_i) }
+          .map { |pages| Update.new(pages: pages) }
+      end
 
       def initialize(pages:)
         @pages = Array(pages)
@@ -33,20 +45,32 @@ module Aoc2024
       def middle
         @pages[@pages.size / 2]
       end
+
+      def make_valid_with!(ruleset)
+        @pages.each_with_index do |page, i|
+          ruleset.rules.each do |rule|
+            next if page != rule.first
+
+            target = @pages.index(rule.last)
+            next unless target && i > target
+
+            # swap
+            @pages[target], @pages[i] = @pages[i], @pages[target]
+          end
+        end
+
+        if ruleset.valid_with? pages
+          self
+        else
+          make_valid_with!(ruleset)
+        end
+      end
     end
 
     class Puzzle
       def self.from(rules:, updates:)
-        input = File.read(rules)
-          .split("\n")
-          .map { |pair| pair.split("|").map(&:to_i) }
-        r = Ruleset.new(rules: input)
-
-        u = File.read(updates)
-          .split("\n")
-          .map { |pages| pages.split(",").map(&:to_i) }
-          .map { |pages| Update.new(pages: pages) }
-        new(ruleset: r, updates: u)
+        new(ruleset: Ruleset.from(rules),
+          updates: Update.factory_from(updates))
       end
 
       def initialize(ruleset:, updates:)
@@ -54,8 +78,15 @@ module Aoc2024
         @updates = updates
       end
 
-      def solution
+      def valid_updates_middle_sums
         @updates.select { |u| @ruleset.valid_with? u.pages }
+          .map { |u| u.middle }
+          .sum
+      end
+
+      def fixed_updates_middle_sums
+        @updates.reject { |u| @ruleset.valid_with? u.pages }
+          .map { |u| u.make_valid_with! @ruleset }
           .map { |u| u.middle }
           .sum
       end

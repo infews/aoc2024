@@ -49,7 +49,7 @@ module Aoc2024::Day05
         it "finds the correct solution" do
           puzzle = Puzzle.from(rules: "spec/data/day05_test_rules.txt",
             updates: "spec/data/day05_test_updates.txt")
-          expect(puzzle.solution).to eq(143)
+          expect(puzzle.valid_updates_middle_sums).to eq(143)
         end
       end
 
@@ -57,25 +57,57 @@ module Aoc2024::Day05
         it "finds the correct solution" do
           puzzle = Puzzle.from(rules: "spec/data/day05_rules.txt",
             updates: "spec/data/day05_updates.txt")
-          expect(puzzle.solution).to eq(5129)
+          expect(puzzle.valid_updates_middle_sums).to eq(5129)
         end
       end
     end
 
-    # context "part two" do
-    #   context "with test data" do
-    #     it "solves correctly" do
-    #       puzzle = Puzzle.from("spec/data/day04_test.txt")
-    #       expect(puzzle.solve_part_two).to eq(9)
-    #     end
-    #   end
-    #
-    #   context "with real data" do
-    #     it "solves correctly" do
-    #       puzzle = Puzzle.from("spec/data/day04.txt")
-    #       expect(puzzle.solve_part_two).to eq(1868)
-    #     end
-    #   end
-    # end
+    context "part two" do
+      describe Update do
+        describe "#make_valid_with" do
+          let(:ruleset) { Ruleset.from("spec/data/day05_test_rules.txt") }
+          context "when the update is already valid" do
+            it "has equivalent pages" do
+              update = Update.new(pages: [75, 47, 61, 53, 29])
+              update.make_valid_with! ruleset
+              expect(update.pages).to eq([75, 47, 61, 53, 29])
+            end
+          end
+
+          context "when the update is invalid" do
+            context "when one fix is all that's required" do
+              it "repairs the pages" do
+                update = Update.new(pages: [75, 97, 47, 61, 53])
+                update.make_valid_with! ruleset
+                expect(update.pages).to eq([97, 75, 47, 61, 53])
+              end
+            end
+            context "when multiple passes are required" do
+              it "repairs the pages" do
+                update = Update.new(pages: [97, 13, 75, 29, 47])
+                update.make_valid_with! ruleset
+                expect(update.pages).to eq([97, 75, 47, 29, 13])
+              end
+            end
+          end
+        end
+      end
+
+      context "with test data" do
+        it "finds the correct solution" do
+          puzzle = Puzzle.from(rules: "spec/data/day05_test_rules.txt",
+            updates: "spec/data/day05_test_updates.txt")
+          expect(puzzle.fixed_updates_middle_sums).to eq(123)
+        end
+      end
+
+      context "with real data" do
+        it "finds the correct solution" do
+          puzzle = Puzzle.from(rules: "spec/data/day05_rules.txt",
+            updates: "spec/data/day05_updates.txt")
+          expect(puzzle.fixed_updates_middle_sums).to eq(4077)
+        end
+      end
+    end
   end
 end
