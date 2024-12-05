@@ -18,36 +18,36 @@ module Aoc2024
         find("X").each do |coords|
           row, col = coords
 
-          if col + 3 < @size
-            count += 1 if xmas? east_of(row, col)
+          if col + 3 < @size && xmas?(east_of(row, col))
+            count += 1
           end
 
-          if row + 3 < @size && col + 3 < @size
-            count += 1 if xmas? south_east_of(row, col)
+          if row + 3 < @size && col + 3 < @size && xmas?(south_east_of(row, col))
+            count += 1
           end
 
-          if row + 3 < @size
-            count += 1 if xmas? south_of(row, col)
+          if row + 3 < @size && xmas?(south_of(row, col))
+            count += 1
           end
 
-          if row + 3 < @size && col - 3 >= 0
-            count += 1 if xmas? south_west_of(row, col)
+          if row + 3 < @size && col - 3 >= 0 && xmas?(south_west_of(row, col))
+            count += 1
           end
 
-          if col - 3 >= 0
-            count += 1 if xmas? west_of(row, col)
+          if col - 3 >= 0 && xmas?(west_of(row, col))
+            count += 1
           end
 
-          if row - 3 >= 0 && col - 3 >= 0
-            count += 1 if xmas? north_west_of(row, col)
+          if row - 3 >= 0 && col - 3 >= 0 && xmas?(north_west_of(row, col))
+            count += 1
           end
 
-          if row - 3 >= 0
-            count += 1 if xmas? north_of(row, col)
+          if row - 3 >= 0 && xmas?(north_of(row, col))
+            count += 1
           end
 
-          if row - 3 >= 0 && col + 3 < @size
-            count += 1 if xmas? north_east_of(row, col)
+          if row - 3 >= 0 && col + 3 < @size && xmas?(north_east_of(row, col))
+            count += 1
           end
         end
         count
