@@ -2,74 +2,86 @@
 
 module Aoc2024
   module Day04
-    class PuzzlePartOne
+    class Puzzle
       def self.from(filename)
         new(input: File.read(filename)
                        .split("\n"))
       end
 
       def initialize(input:)
-        @count = 0
-        @input = input.map { |line| line.split("") }
+        @input = input.map { |line| line.chars }
         @size = @input.size
-
-        find_xs
-        count_xmas
       end
 
-      def solution
-        @count
-      end
-
-      def find_xs
-        @as = []
-        @input.each_with_index do |line, row|
-          line.each_with_index do |char, col|
-            @as << [row, col] if char == "X"
-          end
-        end
-      end
-
-      def count_xmas
-        @as.each do |coords|
-          row = coords.first
-          col = coords.last
+      def solve_part_one
+        count = 0
+        find("X").each do |coords|
+          row, col = coords
 
           if col + 3 < @size
-            @count += 1 if xmas? east_of(row, col)
+            count += 1 if xmas? east_of(row, col)
           end
 
           if row + 3 < @size && col + 3 < @size
-            @count += 1 if xmas? south_east_of(row, col)
+            count += 1 if xmas? south_east_of(row, col)
           end
 
           if row + 3 < @size
-            @count += 1 if xmas? south_of(row, col)
+            count += 1 if xmas? south_of(row, col)
           end
 
           if row + 3 < @size && col - 3 >= 0
-            @count += 1 if xmas? south_west_of(row, col)
+            count += 1 if xmas? south_west_of(row, col)
           end
 
           if col - 3 >= 0
-            @count += 1 if xmas? west_of(row, col)
+            count += 1 if xmas? west_of(row, col)
           end
 
           if row - 3 >= 0 && col - 3 >= 0
-            @count += 1 if xmas? north_west_of(row, col)
+            count += 1 if xmas? north_west_of(row, col)
           end
 
           if row - 3 >= 0
-            @count += 1 if xmas? north_of(row, col)
+            count += 1 if xmas? north_of(row, col)
           end
 
           if row - 3 >= 0 && col + 3 < @size
-            @count += 1 if xmas? north_east_of(row, col)
+            count += 1 if xmas? north_east_of(row, col)
           end
         end
+        count
+      end
+
+      def solve_part_two
+        count = 0
+        find("A").each do |coords|
+          row, col = coords
+
+          next if row - 1 < 0 || row + 1 >= @size ||
+            col - 1 < 0 || col + 1 >= @size
+
+          corners = @input[row - 1][col - 1] +
+            @input[row + 1][col - 1] +
+            @input[row - 1][col + 1] +
+            @input[row + 1][col + 1]
+
+          count += 1 if /MMSS|SSMM|MSMS|SMSM/.match?(corners)
+        end
+        count
       end
 
       private
+
+      def find(value)
+        points = []
+        @input.each_with_index do |line, row|
+          line.each_with_index do |char, col|
+            points << [row, col] if char == value
+          end
+        end
+        points
+      end
 
       def north_east_of(row, col)
         @input[row][col] + @input[row - 1][col + 1] + @input[row - 2][col + 2] + @input[row - 3][col + 3]
@@ -105,56 +117,6 @@ module Aoc2024
 
       def xmas?(chars)
         chars == "XMAS"
-      end
-    end
-
-    class PuzzlePartTwo
-      def self.from(filename)
-        new(input: File.read(filename)
-                       .split("\n"))
-      end
-
-      def initialize(input:)
-        @count = 0
-        @input = input.map { |line| line.split("") }
-        @size = @input.size
-
-        find_as
-        count_xmas
-      end
-
-      def solution
-        @count
-      end
-
-      def find_as
-        @as = []
-        @input.each_with_index do |line, row|
-          line.each_with_index do |char, col|
-            @as << [row, col] if char == "A"
-          end
-        end
-      end
-
-      def count_xmas
-        @as.each do |coords|
-          row = coords.first
-          col = coords.last
-
-          next if row - 1 < 0 || row + 1 >= @size ||
-            col - 1 < 0 || col + 1 >= @size
-
-          corners = @input[row - 1][col - 1] +
-            @input[row + 1][col - 1] +
-            @input[row - 1][col + 1] +
-            @input[row + 1][col + 1]
-
-          @count += 1 if xmas?(corners)
-        end
-      end
-
-      def xmas?(word)
-        word.match /MMSS|SSMM|MSMS|SMSM/
       end
     end
   end
