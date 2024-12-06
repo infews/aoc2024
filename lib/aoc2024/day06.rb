@@ -2,20 +2,17 @@
 
 module Aoc2024
   module Day06
-
     class Puzzle
-      DIR = {
-        up: :right,
-        right: :down,
-        down: :left,
-        left: :up
-      }
+      DIR = {up: :right, right: :down, down: :left, left: :up}
+
+      NEXT_ROW = {up: -1, right: 0, down: 1, left: 0}
+
+      NEXT_COL = {up: 0, right: 1, down: 0, left: -1}
 
       def self.from(filename)
         new(map: File.read(filename, chomp: true)
                      .split("\n")
-                     .map { |line| line.chars }
-        )
+                     .map { |line| line.chars })
       end
 
       def initialize(map:)
@@ -26,7 +23,7 @@ module Aoc2024
 
       def unique_visits
         predict
-        @map.flatten.join.scan(/X/).size
+        @map.flatten.join.scan("X").size
       end
 
       private
@@ -56,20 +53,9 @@ module Aoc2024
       end
 
       def look
-        row, col = if @guard_dir == :up
-                     [@guard_row - 1, @guard_col]
-                   elsif @guard_dir == :right
-                     [@guard_row, @guard_col + 1]
-                   elsif @guard_dir == :down
-                     [@guard_row + 1, @guard_col]
-                   else
-                     # @guard_dir == :left
-                     [@guard_row, @guard_col - 1]
-                   end
-
-        if !on_map(row, col)
-          "O"
-        else
+        row = @guard_row + NEXT_ROW[@guard_dir]
+        col = @guard_col + NEXT_COL[@guard_dir]
+        if on_map(row, col)
           @map[row][col]
         end
       end
@@ -78,16 +64,8 @@ module Aoc2024
         return unless on_map(@guard_row, @guard_col)
 
         @map[@guard_row][@guard_col] = "X"
-        if @guard_dir == :up
-          @guard_row -= 1
-        elsif @guard_dir == :right
-          @guard_col += 1
-        elsif @guard_dir == :down
-          @guard_row += 1
-        else
-          # @guard_dir == :left
-          @guard_col -= 1
-        end
+        @guard_row += NEXT_ROW[@guard_dir]
+        @guard_col += NEXT_COL[@guard_dir]
       end
     end
   end
