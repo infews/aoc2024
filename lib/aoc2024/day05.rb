@@ -15,13 +15,13 @@ module Aoc2024
         @rules = Array(rules)
       end
 
-      def valid_with?(u = [])
-        update = Array(u)
-        return true if update.empty?
+      def valid_with?(p = [])
+        pages = Array(p)
+        return true if pages.empty?
 
         @rules.map do |rule|
-          if update.include?(rule.first) && update.include?(rule.last)
-            update.index(rule.first) < update.index(rule.last)
+          if pages.include?(rule.first) && pages.include?(rule.last)
+            pages.index(rule.first) < pages.index(rule.last)
           else
             true
           end
