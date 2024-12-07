@@ -17,6 +17,7 @@ module Aoc2024
 
       def initialize(map:)
         @map = map
+        @new_obstacles = []
         @obstacles = []
         @guard_row, @guard_col = find_guard(@map)
         @guard_dir = :up
@@ -29,7 +30,7 @@ module Aoc2024
 
       def new_obstacles_count
         predict
-        @obstacles.uniq.size
+        @new_obstacles.uniq.size
       end
 
       private
@@ -66,8 +67,9 @@ module Aoc2024
 
       def direct_obstacle?
         row, col = next_position(@guard_row, @guard_col, @guard_dir)
-        if on_map(row, col)
-          @map[row][col] == "#"
+        if on_map(row, col) && @map[row][col] == "#"
+          @obstacles << [row, col]
+          true
         end
       end
 
@@ -82,21 +84,29 @@ module Aoc2024
         seen_row, seen_col = next_position(@guard_row, @guard_col, @guard_dir)
         return unless on_map(seen_row, seen_col)
 
-        look_for_loop = if @guard_dir == :up
-                          seen_col.upto(@map.size - 1).map { |i| @map[seen_row][i] }
-                        elsif @guard_dir == :down
-                          seen_col.downto(0).map { |i| @map[seen_row][i] }
-                        elsif @guard_dir == :left
-                          seen_row.downto(0).map { |i| @map[i][seen_col] }
-                        else
-                          # @guard_dir == :right
-                          seen_row.upto(@map.size - 1).map { |i| @map[i][seen_col] }
-                        end
+        seen_obs = if @guard_dir == :up
+                     index = seen_col.upto(@map.size - 1)
+                                       .map { |i| @map[seen_row][i] }
+                                       .find_index("#")
+                     index.nil? ? [-1, -1] : [seen_row, seen_col + index]
+                   elsif @guard_dir == :down
+                     index = seen_col.downto(0).map { |i| @map[seen_row][i] }
+                                       .find_index("#")
+                     index.nil? ? [-1, -1] : [seen_row, seen_col - index]
+                   elsif @guard_dir == :left
+                     index = seen_row.downto(0).map { |i| @map[i][seen_col] }
+                                       .find_index("#")
+                     index.nil? ? [-1, -1] : [seen_row - index, seen_col]
+                   else
+                     # @guard_dir == :right
+                     index = seen_row.upto(@map.size - 1).map { |i| @map[i][seen_col] }
+                                       .find_index("#")
+                     index.nil? ? [-1, -1] : [seen_row + index, seen_col]
+                   end
 
-        look = look_for_loop.join
-        if look.match(/XX#/)
-          obs_row, obs_col = next_position(seen_row, seen_col, @guard_dir)
-          @obstacles << [obs_row, obs_col]
+        if @obstacles.include? seen_obs
+          new_row, new_col = next_position(seen_row, seen_col, @guard_dir)
+          @new_obstacles << [new_row, new_col]
         end
       end
     end
