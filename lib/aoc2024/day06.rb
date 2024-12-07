@@ -3,11 +3,11 @@
 module Aoc2024
   module Day06
     class Puzzle
-      DIR = {up: :right, right: :down, down: :left, left: :up}
+      NEXT_DIR = { up: :right, right: :down, down: :left, left: :up }
 
-      NEXT_ROW = {up: -1, right: 0, down: 1, left: 0}
+      NEXT_ROW = { up: -1, right: 0, down: 1, left: 0 }
 
-      NEXT_COL = {up: 0, right: 1, down: 0, left: -1}
+      NEXT_COL = { up: 0, right: 1, down: 0, left: -1 }
 
       def self.from(filename)
         new(map: File.read(filename, chomp: true)
@@ -17,6 +17,7 @@ module Aoc2024
 
       def initialize(map:)
         @map = map
+        @obstacles = []
         @guard_row, @guard_col = find_guard(@map)
         @guard_dir = :up
       end
@@ -24,6 +25,11 @@ module Aoc2024
       def unique_visits
         predict
         @map.flatten.join.scan("X").size
+      end
+
+      def new_obstacles_count
+        predict
+        @obstacles.uniq.size
       end
 
       private
@@ -39,7 +45,8 @@ module Aoc2024
 
       def predict
         while on_map(@guard_row, @guard_col)
-          turn if look == "#"
+          turn if direct_obstacle?
+          check_for_loop_obstacle
           mark_and_move
         end
       end
@@ -49,14 +56,18 @@ module Aoc2024
       end
 
       def turn
-        @guard_dir = DIR[@guard_dir]
+        @guard_dir = NEXT_DIR[@guard_dir]
       end
 
-      def look
-        row = @guard_row + NEXT_ROW[@guard_dir]
-        col = @guard_col + NEXT_COL[@guard_dir]
+      def next_position(row, col, direction)
+        [row + NEXT_ROW[direction],
+         col + NEXT_COL[direction]]
+      end
+
+      def direct_obstacle?
+        row, col = next_position(@guard_row, @guard_col, @guard_dir)
         if on_map(row, col)
-          @map[row][col]
+          @map[row][col] == "#"
         end
       end
 
@@ -64,8 +75,29 @@ module Aoc2024
         return unless on_map(@guard_row, @guard_col)
 
         @map[@guard_row][@guard_col] = "X"
-        @guard_row += NEXT_ROW[@guard_dir]
-        @guard_col += NEXT_COL[@guard_dir]
+        @guard_row, @guard_col = next_position(@guard_row, @guard_col, @guard_dir)
+      end
+
+      def check_for_loop_obstacle
+        seen_row, seen_col = next_position(@guard_row, @guard_col, @guard_dir)
+        return unless on_map(seen_row, seen_col)
+
+        look_for_loop = if @guard_dir == :up
+                          seen_col.upto(@map.size - 1).map { |i| @map[seen_row][i] }
+                        elsif @guard_dir == :down
+                          seen_col.downto(0).map { |i| @map[seen_row][i] }
+                        elsif @guard_dir == :left
+                          seen_row.downto(0).map { |i| @map[i][seen_col] }
+                        else
+                          # @guard_dir == :right
+                          seen_row.upto(@map.size - 1).map { |i| @map[i][seen_col] }
+                        end
+
+        look = look_for_loop.join
+        if look.match(/XX#/)
+          obs_row, obs_col = next_position(seen_row, seen_col, @guard_dir)
+          @obstacles << [obs_row, obs_col]
+        end
       end
     end
   end

@@ -18,5 +18,20 @@ module Aoc2024::Day06
         end
       end
     end
+
+    context "part two" do
+      context "with test data" do
+        it "finds the correct solution" do
+          puzzle = Puzzle.from("spec/data/day06_test.txt")
+          expect(puzzle.new_obstacles_count).to eq(6)
+        end
+      end
+      context "with real data" do
+        it "finds the correct solution" do
+          puzzle = Puzzle.from("spec/data/day06.txt")
+          expect(puzzle.new_obstacles_count).to eq(6)
+        end
+      end
+    end
   end
 end
