@@ -13,33 +13,22 @@ module Aoc2024
       end
 
       def initialize(input:)
+        # Each problem is is Hash, (target vale) => [array of values to operate on]
         @problems = input
       end
 
-      def all_calculations_for(values, ops, &block)
-        ops.repeated_permutation(values.size - 1)
-           .map { |ops_set| yield ops_set, values.first, values[1..] }
-      end
-
-      def solve_part_one
+      def run_all_operations_with(ops)
         @problems.map do |problem|
           target, values = problem.first
-          all_calculations_for(values, ["*", "+"]) do |set, first, rest|
-            set.zip(rest)
-               .inject(first) do |acc, pair|
-              op, val = pair
-              acc.send(op.to_sym, val)
-            end
-          end.any? { |calc| calc == target } ? target : 0
-        end.sum
-      end
+          # Get all permutations of the operations for the number of slots (values.size - 1)
+          ops.repeated_permutation(values.size - 1)
+             .map do |ops_set|
+            first = values.first
+            rest = values[1..]
 
-      def solve_part_two
-        vals = @problems.map do |problem|
-          target, values = problem.first
-          all_calculations_for(values,["*", "+", "||"]) do |set, first, rest|
-            set.zip(rest)
-               .inject(first) do |acc, pair|
+            # zip together operations and values: [[op, val], [op, val]...]
+            ops_set.zip(rest)
+                   .inject(first) do |acc, pair| # reduce the operations per the rules
               op, val = pair
               if op == "||"
                 acc = "#{acc}#{val}".to_i
@@ -47,9 +36,20 @@ module Aoc2024
                 acc.send(op.to_sym, val)
               end
             end
-          end.any? { |calc| calc == target } ? target : 0
-        end
-        vals.sum
+          end # has all the results for this problem
+          # Do any of them match the target value?
+             .any? { |calc| calc == target } ? target : 0
+        end.sum
+      end
+
+      def solve_part_one
+        ops = ["*", "+"]
+        run_all_operations_with(ops)
+      end
+
+      def solve_part_two
+        ops = ["*", "+", "||"]
+        run_all_operations_with(ops)
       end
     end
   end
