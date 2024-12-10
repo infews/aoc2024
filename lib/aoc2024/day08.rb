@@ -10,16 +10,15 @@ module Aoc2024
       end
 
       def initialize(input:)
-        # Each problem is is Hash, (target vale) => [array of values to operate on]
         @map = input
         @row_size = @map.size
         @col_size = @map.first.size
         @antennae = {}
         find_antennae
+        @antinodes = []
       end
 
       def single_antinodes
-        @antinodes = []
         @antennae.each do |type, points|
           points.combination(2)
                 .each do |pair|
@@ -44,7 +43,32 @@ module Aoc2024
         @antinodes.uniq!
       end
 
+      def full_antinodes
+        @antennae.each do |type, points|
+          points.combination(2)
+                .each do |pair|
+            p1, p2 = Point.from(pair) # p1.row < p2.row
+
+            row_dist = p2.row - p1.row
+            col_dist = p2.col - p1.col
+
+            slope = col_dist == 0 ? 0 : (row_dist * 1.0 / col_dist)
+
+            find_antinodes_from(p1, row_dist, slope)
+            find_antinodes_from(p2, -row_dist, slope)
+          end
+        end
+        @antinodes.uniq!
+      end
+
       private
+
+      def find_antinodes_from(point, row_dist, m)
+        while on_map(point.row, point.col) do
+          @antinodes << [point.row, point.col]
+          point = Point.from_ps(point, point.row - row_dist, m)
+        end
+      end
 
       def find_antennae
         @map.each_with_index do |row, y|
