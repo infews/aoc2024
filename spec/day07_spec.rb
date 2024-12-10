@@ -2,7 +2,7 @@
 
 require "rspec"
 module Aoc2024::Day07
-  RSpec.describe "Solution" do
+  RSpec.describe Puzzle do
     context "part one" do
       context "with test data" do
         it "finds the correct solution" do
