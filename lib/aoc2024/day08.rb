@@ -1,7 +1,7 @@
 module Aoc2024
   module Day08
     class Puzzle
-      attr_reader :antennae, :antinodes
+      attr_reader :antennae
 
       def self.from(filename)
         new(input: File.read(filename)
@@ -16,21 +16,35 @@ module Aoc2024
         @col_size = @map.first.size
         @antennae = {}
         find_antennae
-        find_antinodes
-        @antinodes.uniq!
       end
 
-      private
-
-      def find_antinodes
+      def single_antinodes
         @antinodes = []
         @antennae.each do |type, points|
           points.combination(2)
                 .each do |pair|
-            antinodes_for(pair)
+            p1, p2 = Point.from(pair) # p1.row < p2.row
+
+            row_dist = p2.row - p1.row
+            col_dist = p2.col - p1.col
+
+            m = col_dist == 0 ? 0 : (row_dist * 1.0 / col_dist)
+
+            [Point.from_ps(p1, p1.row - row_dist, m),
+             Point.from_ps(p2, p2.row + row_dist, m)].each do |p|
+              r = p.row.to_i
+              c = p.col
+              if on_map(r, c)
+                @antinodes << [r, c]
+              end
+            end
           end
         end
+
+        @antinodes.uniq!
       end
+
+      private
 
       def find_antennae
         @map.each_with_index do |row, y|
@@ -44,31 +58,6 @@ module Aoc2024
 
       def on_map(row, col)
         row >= 0 && row < @row_size && col >= 0 && col < @col_size
-      end
-
-      def antinodes_for(pair)
-        p1, p2 = Point.from(pair) # p1.row < p2.row
-
-        row_dist = p2.row - p1.row
-        col_dist = p2.col - p1.col
-
-        m = col_dist == 0 ? 0 : (row_dist * 1.0 / col_dist)
-
-        a1, a2 = if m > 0
-                   [Point.from_ps(p1, p1.row - row_dist, m),
-                    Point.from_ps(p2, p2.row + row_dist, m)]
-                 else
-                   [Point.from_ps(p1, p1.row - row_dist, m),
-                    Point.from_ps(p2, p2.row + row_dist, m)]
-                 end
-
-        [a1, a2].each do |p|
-          r = p.row.to_i
-          c = p.col
-          if on_map(r, c)
-            @antinodes << [r, c]
-          end
-        end
       end
     end
 
