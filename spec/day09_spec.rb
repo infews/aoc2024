@@ -13,10 +13,10 @@ module Aoc2024::Day09
             expect(disk.id_map.join).to eq("0..111....22222")
           end
           it "saves the index of the first free block" do
-            expect(disk.first_free_index).to eq(1)
+            expect(disk.first_free_block_index).to eq(1)
           end
           it "saves the index of the last file" do
-            expect(disk.last_file_index).to eq(10)
+            expect(disk.last_file_block_index).to eq(10)
           end
           it "saves the total free space" do
             expect(disk.total_free_space).to eq(6)
@@ -30,11 +30,11 @@ module Aoc2024::Day09
           end
 
           it "saves the index of the first free block" do
-            expect(disk.first_free_index).to eq(2)
+            expect(disk.first_free_block_index).to eq(2)
           end
 
           it "saves the index of the last file" do
-            expect(disk.last_file_index).to eq(40)
+            expect(disk.last_file_block_index).to eq(40)
 
           end
           it "saves the total free space" do
@@ -43,12 +43,12 @@ module Aoc2024::Day09
         end
       end
 
-      describe "#compact" do
+      describe "#compact_free_space!" do
         context "for example 1" do
           let(:disk) { Disk.from("spec/data/day09_test1.txt") }
 
           it "compacts as expected" do
-            disk.compact!
+            disk.compact_free_space!
             expect(disk.id_map.join).to eq("022111222......")
           end
         end
@@ -57,7 +57,7 @@ module Aoc2024::Day09
           let(:disk) { Disk.from("spec/data/day09_test2.txt") }
 
           it "compacts as expected" do
-            disk.compact!
+            disk.compact_free_space!
             expect(disk.id_map.join).to eq("0099811188827773336446555566..............")
           end
         end
@@ -68,7 +68,7 @@ module Aoc2024::Day09
           let(:disk) { Disk.from("spec/data/day09_test2.txt") }
 
           it "calculates the right value" do
-            disk.compact!
+            disk.compact_free_space!
             expect(disk.filesystem_checksum).to eq(1928)
           end
         end
@@ -78,7 +78,41 @@ module Aoc2024::Day09
 
           it "calculates the right value" do
             disk
-            disk.compact!
+            disk.compact_free_space!
+            expect(disk.filesystem_checksum).to eq(6307275788409)
+          end
+        end
+      end
+    end
+
+    context "part two" do
+      describe "#defrag_whole_files!" do
+        context "for example 2" do
+          let(:disk) { Disk.from("spec/data/day09_test2.txt") }
+
+          it "compacts as expected" do
+            disk.defrag_whole_files!
+            expect(disk.id_map.join).to eq("00992111777.44.333....5555.6666.....8888..")
+          end
+        end
+      end
+
+      describe "#filesystem_checksum" do
+        context "for example 2" do
+          let(:disk) { Disk.from("spec/data/day09_test2.txt") }
+
+          it "calculates the right value" do
+            disk.defrag_whole_files!
+            expect(disk.filesystem_checksum).to eq(2858)
+          end
+        end
+
+        context "for real data" do
+          let(:disk) { Disk.from("spec/data/day09.txt") }
+
+          it "calculates the right value" do
+            disk
+            disk.defrag_whole_files!
             expect(disk.filesystem_checksum).to eq(6307275788409)
           end
         end
