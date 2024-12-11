@@ -13,7 +13,7 @@ module Aoc2024
       def initialize(input:)
         @total_free_space = 0
         @file_indexes = []
-        @empty_block_indexes = []
+        @free_block_indexes = []
 
         @disk = build_map(input)
       end
@@ -27,75 +27,84 @@ module Aoc2024
       end
 
       def first_free_block_index
-        @empty_block_indexes.last
+        @free_block_indexes.first
       end
 
       def compact_free_space!
-        last_file_index = @file_indexes.pop
-        first_free_index = @empty_block_indexes.pop
+        file_index = @file_indexes.pop
+        free_index = @free_block_indexes.shift
 
-        while first_free_index <= last_file_index
-          first_free = @disk[first_free_index]
-          last_file = @disk[last_file_index]
+        while free_index <= file_index
+          free = @disk[free_index]
+          file = @disk[file_index]
 
-          if first_free[:length] == last_file[:length]
-            @disk[first_free_index] = last_file
-            @disk[last_file_index] = { id: ".", length: last_file[:length] }
+          if free[:length] == file[:length]
+            @disk[free_index] = file
+            @disk[file_index] = { id: ".", length: file[:length] }
 
-            first_free_index = @empty_block_indexes.pop
-            last_file_index = @file_indexes.pop
-          elsif first_free[:length] > last_file[:length]
-            @disk[first_free_index] = last_file
-            @disk[last_file_index] = { id: ".", length: last_file[:length] }
+            free_index = @free_block_indexes.shift
+            file_index = @file_indexes.pop
+          elsif free[:length] > file[:length]
+            @disk[free_index] = file
+            @disk[file_index] = { id: ".", length: file[:length] }
 
-            first_free[:length] -= last_file[:length]
-            first_free_index += last_file[:length]
-            @disk[first_free_index] = first_free
-            last_file_index = @file_indexes.pop
+            free[:length] -= file[:length]
+            free_index += file[:length]
+            @disk[free_index] = free
+            file_index = @file_indexes.pop
           else
-            # first_free[:length] < last_file[:length]
-            size_moved = first_free[:length]
-            @disk[first_free_index][:id] = last_file[:id]
-            @disk[last_file_index][:length] -= size_moved
-            next_index_after_shorter_file = last_file_index + @disk[last_file_index][:length]
+            # free[:length] < file[:length]
+            size_moved = free[:length]
+            @disk[free_index][:id] = file[:id]
+            @disk[file_index][:length] -= size_moved
+            next_index_after_shorter_file = file_index + @disk[file_index][:length]
             @disk[next_index_after_shorter_file] = { id: ".", length: size_moved }
 
-            first_free_index = @empty_block_indexes.pop
+            free_index = @free_block_indexes.shift
           end
         end
       end
 
       def defrag_whole_files!
-        # while @file_indexes.any?
-        #   last_file_index = @file_indexes.pop
-        #
-        #
-        #
-        #
-        # end
+        @file_indexes.reverse.each do |file_index|
+          file = @disk[file_index]
+          size_to_move = file[:length]
+
+          @free_block_indexes.each_with_index do |free_index, i|
+            free = @disk[free_index]
+
+            next if size_to_move > free[:length]
+
+            if size_to_move == free[:length]
+              @disk[free_index] = file
+              @disk[file_index] = free
+              @free_block_indexes.delete(free_index)
+              break
+            else # size_to_move < free[:length]
+              @disk[free_index] = file
+              @disk[file_index] = { id: ".", length: size_to_move }
+
+              @disk[free_index + size_to_move] = { id: ".", length: free[:length] - size_to_move }
+              @free_block_indexes[i] = free_index + size_to_move
+              break
+            end
+          end
+        end
       end
 
       def filesystem_checksum
         block_index = -1
         @disk.keys
              .sort
-             .sum do |key|
-          (1..@disk[key][:length]).sum do |_l|
+             .sum do |disk_index|
+          (1..@disk[disk_index][:length]).sum do |_l|
             block_index += 1
-            @disk[key][:id].to_i * block_index
+            @disk[disk_index][:id].to_i * block_index
           end
         end
       end
 
       private
-
-      def next_free_block
-        index = @first_free_index + @disk[@first_free_index][:length]
-        while @disk[index][:id] != "."
-          index += @disk[index][:length]
-        end
-        index
-      end
 
       def build_map(input)
         file_number = -1
@@ -107,8 +116,7 @@ module Aoc2024
                          { id: file_number.to_s, length: size }
                        else
                          if size > 0
-                           @empty_block_indexes.unshift(index)
-                           # @first_free_index ||= index
+                           @free_block_indexes << index
                            @total_free_space += size
                            { id: ".", length: size }
                          end
@@ -116,7 +124,6 @@ module Aoc2024
           index += size
           map
         end
-
       end
     end
   end

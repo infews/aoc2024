@@ -113,7 +113,9 @@ module Aoc2024::Day09
           it "calculates the right value" do
             disk
             disk.defrag_whole_files!
-            expect(disk.filesystem_checksum).to eq(6307275788409)
+            expect(disk.filesystem_checksum < 8439434080946).to eq(true)
+            expect(disk.filesystem_checksum > 15805680269).to eq(true)
+            expect(disk.filesystem_checksum).to eq(3)
           end
         end
       end
