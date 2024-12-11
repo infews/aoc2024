@@ -79,16 +79,10 @@ module Aoc2024::Day09
           it "calculates the right value" do
             disk
             disk.compact!
-            expect(disk.filesystem_checksum).to eq(1928)
+            expect(disk.filesystem_checksum).to eq(6307275788409)
           end
-
         end
       end
-
-
-
     end
-
-
   end
 end
