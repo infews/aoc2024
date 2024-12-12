@@ -38,13 +38,13 @@ module Aoc2024
           free = @disk[free_index]
           file = @disk[file_index]
 
-          if free[:length] == file[:length]
+          if file[:length] == free[:length]
             @disk[free_index] = file
             @disk[file_index] = { id: ".", length: file[:length] }
 
             free_index = @free_block_indexes.shift
             file_index = @file_indexes.pop
-          elsif free[:length] > file[:length]
+          elsif file[:length] < free[:length]
             @disk[free_index] = file
             @disk[file_index] = { id: ".", length: file[:length] }
 
