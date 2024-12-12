@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "rspec"
-module Aoc2024::Day3
+module Aoc2024::Day03
   RSpec.describe Puzzle do
     context "part one" do
       context "with test data" do

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "rspec"
-module Aoc2024::Day1
+module Aoc2024::Day01
   RSpec.describe Puzzle1 do
     context "with test data" do
       it "solves correctly" do

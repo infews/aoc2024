@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Aoc2024
-  module Day3
+  module Day03
     class Puzzle
       def self.from_raw_parsing(filename)
         new(segments: File.read(filename)

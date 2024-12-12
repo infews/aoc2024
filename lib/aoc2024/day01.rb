@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Aoc2024
-  module Day1
+  module Day01
     def self.parse(filename)
       lol = File.readlines(filename, chomp: true)
         .map { |line| line.split(/\s+/) }
@@ -26,7 +26,7 @@ module Aoc2024
       end
 
       def self.from(filename)
-        list_1, list_2 = Day1.parse(filename)
+        list_1, list_2 = Day01.parse(filename)
         new(list_1: list_1, list_2: list_2)
       end
     end
@@ -43,7 +43,7 @@ module Aoc2024
       end
 
       def self.from(filename)
-        list_1, list_2 = Day1.parse(filename)
+        list_1, list_2 = Day01.parse(filename)
         new(list_1: list_1, list_2: list_2)
       end
     end
