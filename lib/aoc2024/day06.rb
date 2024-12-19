@@ -18,8 +18,10 @@ module Aoc2024
       def initialize(map:)
         @map = map
         @new_obstacles = []
-        @obstacles = []
-        @guard_row, @guard_col = find_guard(@map)
+        @obstacles = {}
+        @original_pos = find_guard(@map)
+        @guard_row = @original_pos[0]
+        @guard_col = @original_pos[1]
         @guard_dir = :up
       end
 
@@ -31,6 +33,40 @@ module Aoc2024
       def new_obstacles_count
         predict
         @new_obstacles.uniq.size
+      end
+
+      def find_obstacle_to_guard_right(seen_row, seen_col, direction)
+        never_seen = [-1, -1]
+
+        case direction
+        when :up
+          index = seen_col.upto(@map.size - 1)
+                          .map { |i| @map[seen_row][i] }
+                          .find_index("#")
+
+          index.nil? ? never_seen : [seen_row, seen_col + index]
+
+        when :down
+          index = seen_col.downto(0)
+                          .map { |i| @map[seen_row][i] }
+                          .find_index("#")
+
+          index.nil? ? never_seen : [seen_row, seen_col - index]
+
+        when :left
+          index = seen_row.downto(0)
+                          .map { |i| @map[i][seen_col] }
+                          .find_index("#")
+
+          index.nil? ? never_seen : [seen_row - index, seen_col]
+
+        when :right
+          index = seen_row.upto(@map.size - 1)
+                          .map { |i| @map[i][seen_col] }
+                          .find_index("#")
+
+          index.nil? ? never_seen : [seen_row + index, seen_col]
+        end
       end
 
       private
@@ -47,7 +83,7 @@ module Aoc2024
       def predict
         while on_map(@guard_row, @guard_col)
           turn if direct_obstacle?
-          check_for_loop_obstacle
+          check_for_new_obstacle
           mark_and_move
         end
       end
@@ -68,7 +104,11 @@ module Aoc2024
       def direct_obstacle?
         row, col = next_position(@guard_row, @guard_col, @guard_dir)
         if on_map(row, col) && @map[row][col] == "#"
-          @obstacles << [row, col]
+          if @obstacles[[row, col]]
+            @obstacles[[row, col]] << @guard_dir
+          else
+            @obstacles[[row, col]] = [@guard_dir]
+          end
           true
         end
       end
@@ -80,33 +120,20 @@ module Aoc2024
         @guard_row, @guard_col = next_position(@guard_row, @guard_col, @guard_dir)
       end
 
-      def check_for_loop_obstacle
+      def check_for_new_obstacle
         seen_row, seen_col = next_position(@guard_row, @guard_col, @guard_dir)
         return unless on_map(seen_row, seen_col)
 
-        seen_obs = if @guard_dir == :up
-                     index = seen_col.upto(@map.size - 1)
-                                       .map { |i| @map[seen_row][i] }
-                                       .find_index("#")
-                     index.nil? ? [-1, -1] : [seen_row, seen_col + index]
-                   elsif @guard_dir == :down
-                     index = seen_col.downto(0).map { |i| @map[seen_row][i] }
-                                       .find_index("#")
-                     index.nil? ? [-1, -1] : [seen_row, seen_col - index]
-                   elsif @guard_dir == :left
-                     index = seen_row.downto(0).map { |i| @map[i][seen_col] }
-                                       .find_index("#")
-                     index.nil? ? [-1, -1] : [seen_row - index, seen_col]
-                   else
-                     # @guard_dir == :right
-                     index = seen_row.upto(@map.size - 1).map { |i| @map[i][seen_col] }
-                                       .find_index("#")
-                     index.nil? ? [-1, -1] : [seen_row + index, seen_col]
-                   end
+        seen_obs = find_obstacle_to_guard_right(seen_row, seen_col, @guard_dir)
 
-        if @obstacles.include? seen_obs
-          new_row, new_col = next_position(seen_row, seen_col, @guard_dir)
-          @new_obstacles << [new_row, new_col]
+        directions_collided = nil
+        if (directions_collided = @obstacles.fetch([seen_obs[0], seen_obs[1]], false))
+          if directions_collided.include?(NEXT_DIR[@guard_dir])
+            new_row, new_col = next_position(seen_row, seen_col, @guard_dir)
+            if @obstacles[[new_row, new_col]] != [new_row, new_col]
+              @new_obstacles << [new_row, new_col]
+            end
+          end
         end
       end
     end
